@@ -1,9 +1,9 @@
 #pragma once
 
 #include <memory>
+#include "render/Shader.h"
 
 namespace render {
-    class Shader;
     class Renderer {
     public:
         Renderer();

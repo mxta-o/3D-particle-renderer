@@ -1,7 +1,8 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
 #include <memory>
+
+struct GLFWwindow;
 
 namespace render { class Renderer; }
 
