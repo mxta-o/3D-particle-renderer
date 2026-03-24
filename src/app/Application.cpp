@@ -5,6 +5,7 @@
 #include <glad/glad.h>
 #include "app/Camera.h"
 #include "sim/ParticleSystem.h"
+#include <glm/glm.hpp>
 
 static void glfw_mouse_button_cb(GLFWwindow* w, int button, int action, int mods) {
     (void)mods;
@@ -33,6 +34,10 @@ Application::Application(GLFWwindow* window)
     camera_ = std::make_unique<Camera>(45.0f, 800.0f/600.0f);
     particleSystem_ = std::make_unique<ParticleSystem>(20000);
     renderer_->initParticleBuffers(20000);
+    // configure continuous fountain emitter
+    particleSystem_->setEmitterPos(glm::vec3(0.0f, 0.0f, 0.0f));
+    particleSystem_->setEmissionRate(800.0f); // particles per second
+    particleSystem_->start();
     glfwSetWindowUserPointer(window_, this);
     glfwSetMouseButtonCallback(window_, glfw_mouse_button_cb);
     glfwSetCursorPosCallback(window_, glfw_cursor_pos_cb);
@@ -75,10 +80,7 @@ void Application::run() {
 
 void Application::handleMouseButton(int button, int action, double x, double y) {
     if (camera_) camera_->onMouseButton(button, action, x, y);
-    // spawn particles on left-click
-    if (particleSystem_ && action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT) {
-        particleSystem_->spawn(200);
-    }
+    // (click no longer spawns; continuous emitter active)
 }
 
 void Application::handleCursorPos(double x, double y) {

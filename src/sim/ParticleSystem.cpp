@@ -20,7 +20,7 @@ void ParticleSystem::spawn(size_t count) {
         Particle& p = particles_[aliveCount_++];
         float a = ang(gen);
         float s = speed(gen);
-        p.pos = glm::vec3(0.0f);
+        p.pos = emitterPos_;
         p.vel = glm::vec3(cosf(a) * s, (speed(gen) * 0.5f), sinf(a) * s);
         p.color = glm::vec4(1.0f, 0.6f + 0.4f * (s / 3.0f), 0.2f, 1.0f);
         p.life = life(gen);
@@ -28,6 +28,14 @@ void ParticleSystem::spawn(size_t count) {
 }
 
 void ParticleSystem::update(float dt) {
+    // handle continuous emission
+    if (emitting_ && emissionRate_ > 0.0f) {
+        float want = emissionRate_ * dt + emissionAccumulator_;
+        size_t toSpawn = (size_t)want;
+        emissionAccumulator_ = want - float(toSpawn);
+        if (toSpawn > 0) spawn(toSpawn);
+    }
+
     if (aliveCount_ == 0) return;
 
     const glm::vec3 gravity(0.0f, -9.81f, 0.0f);
@@ -46,4 +54,20 @@ void ParticleSystem::update(float dt) {
 
 void ParticleSystem::clear() {
     aliveCount_ = 0;
+}
+
+void ParticleSystem::setEmissionRate(float particlesPerSecond) {
+    emissionRate_ = particlesPerSecond;
+}
+
+void ParticleSystem::setEmitterPos(const glm::vec3& pos) {
+    emitterPos_ = pos;
+}
+
+void ParticleSystem::start() {
+    emitting_ = true;
+}
+
+void ParticleSystem::stop() {
+    emitting_ = false;
 }

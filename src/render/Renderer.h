@@ -17,7 +17,6 @@ namespace render {
         void updateParticleBuffer(const std::vector<Particle>& particles, size_t count);
         void renderParticles(const glm::mat4& mvp, size_t count);
     private:
-        // (triangle rendering removed)
         // particle buffers
         unsigned int pVAO_ = 0, pVBO_ = 0;
         std::unique_ptr<Shader> particleShader_;
