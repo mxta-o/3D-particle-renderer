@@ -1,0 +1,7 @@
+/build/
+/bin/
+/extern/
+.vs/
+.vscode/
+*.swp
+*.swo
