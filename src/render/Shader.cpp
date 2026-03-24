@@ -38,6 +38,11 @@ void Shader::use() {
     glUseProgram(ID_);
 }
 
+void Shader::setMat4(const std::string& name, const float* value) {
+    int loc = glGetUniformLocation(ID_, name.c_str());
+    if (loc != -1) glUniformMatrix4fv(loc, 1, GL_FALSE, value);
+}
+
 string Shader::readFile(const string& path) {
     ifstream in(path);
     if (!in) {

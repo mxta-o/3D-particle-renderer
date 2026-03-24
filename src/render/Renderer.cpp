@@ -1,6 +1,7 @@
 #include "render/Renderer.h"
 #include "render/Shader.h"
 #include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 
 using namespace render;
 
@@ -32,8 +33,9 @@ Renderer::~Renderer() {
     glDeleteBuffers(1, &VBO_);
 }
 
-void Renderer::render() {
+void Renderer::render(const glm::mat4& mvp) {
     shader_->use();
+    shader_->setMat4("u_MVP", glm::value_ptr(mvp));
     glBindVertexArray(VAO_);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
