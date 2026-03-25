@@ -43,9 +43,16 @@ Application::Application(GLFWwindow* window)
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window_, true);
     ImGui_ImplOpenGL3_Init("#version 330");
-    // configure continuous fountain emitter
-    particleSystem_->setEmitterPos(glm::vec3(0.0f, 0.0f, 0.0f));
-    particleSystem_->setEmissionRate(800.0f); // particles per second
+    // configure continuous fountain emitter (start higher)
+    emitterY_ = 3.5f;
+    emissionRateUI_ = 800.0f;
+    restitutionUI_ = 0.5f;
+    groundYUI_ = 0.0f;
+    particleSystem_->setEmitterPos(glm::vec3(0.0f, emitterY_, 0.0f));
+    particleSystem_->setEmissionRate(emissionRateUI_); // particles per second
+    particleSystem_->setRestitution(restitutionUI_);
+    particleSystem_->setGroundHeight(groundYUI_);
+    if (camera_) camera_->setTarget(glm::vec3(0.0f, emitterY_, 0.0f));
     particleSystem_->start();
     glfwSetWindowUserPointer(window_, this);
     glfwSetMouseButtonCallback(window_, glfw_mouse_button_cb);
@@ -89,6 +96,27 @@ void Application::run() {
         ImGui::Text("FPS: %.1f", io.Framerate);
         if (particleSystem_) {
             ImGui::Text("Particles: %zu", particleSystem_->aliveCount());
+        }
+        // Emitter controls
+        if (ImGui::CollapsingHeader("Emitter")) {
+            if (ImGui::SliderFloat("Emitter Y", &emitterY_, 0.0f, 20.0f)) {
+                particleSystem_->setEmitterPos(glm::vec3(0.0f, emitterY_, 0.0f));
+                if (camera_) camera_->setTarget(glm::vec3(0.0f, emitterY_, 0.0f));
+            }
+            if (ImGui::SliderFloat("Emission Rate", &emissionRateUI_, 0.0f, 5000.0f)) {
+                particleSystem_->setEmissionRate(emissionRateUI_);
+            }
+            if (ImGui::SliderFloat("Restitution", &restitutionUI_, 0.0f, 1.0f)) {
+                particleSystem_->setRestitution(restitutionUI_);
+            }
+            if (ImGui::SliderFloat("Ground Y", &groundYUI_, -5.0f, 5.0f)) {
+                particleSystem_->setGroundHeight(groundYUI_);
+            }
+            if (ImGui::Button("Start/Stop")) {
+                static bool running = true;
+                running = !running;
+                if (running) particleSystem_->start(); else particleSystem_->stop();
+            }
         }
         ImGui::End();
 

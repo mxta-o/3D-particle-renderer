@@ -45,6 +45,17 @@ void ParticleSystem::update(float dt) {
         p.vel += gravity * dt;
         p.pos += p.vel * dt;
         p.life -= dt;
+        // ground collision: if below groundY_, clamp and bounce
+        if (p.pos.y < groundY_) {
+            p.pos.y = groundY_;
+            if (p.vel.y < 0.0f) {
+                p.vel.y = -p.vel.y * restitution_;
+                // some lateral damping on bounce
+                p.vel.x *= 0.8f;
+                p.vel.z *= 0.8f;
+            }
+        }
+
         if (p.life > 0.0f) {
             particles_[write++] = p;
         }
@@ -70,4 +81,12 @@ void ParticleSystem::start() {
 
 void ParticleSystem::stop() {
     emitting_ = false;
+}
+
+void ParticleSystem::setGroundHeight(float y) {
+    groundY_ = y;
+}
+
+void ParticleSystem::setRestitution(float r) {
+    restitution_ = r;
 }

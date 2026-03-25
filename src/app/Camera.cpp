@@ -39,6 +39,10 @@ void Camera::onScroll(double yoffset) {
     if (distance_ < 0.1f) distance_ = 0.1f;
 }
 
+void Camera::setTarget(const glm::vec3& t) {
+    target_ = t;
+}
+
 glm::mat4 Camera::getViewProjection() const {
     // spherical to Cartesian
     float x = distance_ * cosf(pitch_) * sinf(yaw_);

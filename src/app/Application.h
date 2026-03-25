@@ -21,4 +21,9 @@ private:
     std::unique_ptr<render::Renderer> renderer_;
     std::unique_ptr<Camera> camera_;
     std::unique_ptr<class ParticleSystem> particleSystem_;
+    // UI state for emitter / ground
+    float emitterY_ = 3.5f;
+    float emissionRateUI_ = 800.0f;
+    float restitutionUI_ = 0.5f;
+    float groundYUI_ = 0.0f;
 };

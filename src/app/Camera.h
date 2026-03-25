@@ -10,6 +10,7 @@ public:
     void onCursorPos(double x, double y);
     void onScroll(double yoffset);
     glm::mat4 getViewProjection() const;
+    void setTarget(const glm::vec3& t);
 private:
     glm::vec3 target_ = glm::vec3(0.0f);
     float distance_ = 3.0f;

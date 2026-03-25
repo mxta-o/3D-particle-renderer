@@ -23,10 +23,12 @@ namespace render {
         unsigned int pVAO_ = 0, pVBO_ = 0;
         std::unique_ptr<Shader> particleShader_;
         size_t particleCapacity_ = 0;
-        // grid (space-time) visualization
-        unsigned int gVAO_ = 0, gVBO_ = 0;
+        // grid (space-time) visualization: two passes (minor/major)
+        unsigned int gVAO_minor_ = 0, gVBO_minor_ = 0;
+        unsigned int gVAO_major_ = 0, gVBO_major_ = 0;
         std::unique_ptr<Shader> gridShader_;
-        size_t gridVertexCount_ = 0;
-        void initGrid(float extent = 10.0f, float spacing = 1.0f);
+        size_t gridCountMinor_ = 0;
+        size_t gridCountMajor_ = 0;
+        void initGrid(float extent = 10.0f, float spacing = 1.0f, int majorEvery = 5);
     };
 }

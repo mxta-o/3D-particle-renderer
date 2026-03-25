@@ -48,6 +48,11 @@ void Shader::setFloat(const std::string& name, float v) {
     if (loc != -1) glUniform1f(loc, v);
 }
 
+void Shader::setVec3(const std::string& name, float x, float y, float z) {
+    int loc = glGetUniformLocation(ID_, name.c_str());
+    if (loc != -1) glUniform3f(loc, x, y, z);
+}
+
 string Shader::readFile(const string& path) {
     ifstream in(path);
     if (!in) {

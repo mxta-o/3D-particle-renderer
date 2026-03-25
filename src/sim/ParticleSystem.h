@@ -17,6 +17,9 @@ public:
     void setEmitterPos(const glm::vec3& pos);
     void start();
     void stop();
+    // ground / collision
+    void setGroundHeight(float y);
+    void setRestitution(float r);
 
     // Advance simulation by dt seconds (simple Euler integrator)
     void update(float dt);
@@ -39,4 +42,7 @@ private:
     glm::vec3 emitterPos_{0.0f, 0.0f, 0.0f};
     float emissionAccumulator_ = 0.0f;
     bool emitting_ = false;
+    // ground collision
+    float groundY_ = 0.0f;
+    float restitution_ = 0.5f; // bounce multiplier
 };

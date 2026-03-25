@@ -9,14 +9,16 @@ using namespace render;
 Renderer::Renderer() {
     // triangle rendering removed; particle buffers are initialized via initParticleBuffers()
     // initialize a grid visualization
-    initGrid(12.0f, 1.0f);
+    initGrid(12.0f, 1.0f, 5);
 }
 
 Renderer::~Renderer() {
     if (pVAO_ != 0) glDeleteVertexArrays(1, &pVAO_);
     if (pVBO_ != 0) glDeleteBuffers(1, &pVBO_);
-    if (gVAO_ != 0) glDeleteVertexArrays(1, &gVAO_);
-    if (gVBO_ != 0) glDeleteBuffers(1, &gVBO_);
+    if (gVAO_minor_ != 0) glDeleteVertexArrays(1, &gVAO_minor_);
+    if (gVBO_minor_ != 0) glDeleteBuffers(1, &gVBO_minor_);
+    if (gVAO_major_ != 0) glDeleteVertexArrays(1, &gVAO_major_);
+    if (gVBO_major_ != 0) glDeleteBuffers(1, &gVBO_major_);
 }
 
 void Renderer::render(const glm::mat4& mvp) {
@@ -69,47 +71,87 @@ void Renderer::updateParticleBuffer(const std::vector<Particle>& particles, size
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void Renderer::initGrid(float extent, float spacing) {
+void Renderer::initGrid(float extent, float spacing, int majorEvery) {
     gridShader_ = std::make_unique<Shader>("src/render/shaders/grid.vert", "src/render/shaders/grid.frag");
 
-    std::vector<float> verts;
+    std::vector<float> vertsMinor;
+    std::vector<float> vertsMajor;
     int lines = (int)std::floor((extent * 2.0f) / spacing) + 1;
     float start = -extent;
     // lines along X (varying Z)
     for (int i = 0; i < lines; ++i) {
         float z = start + i * spacing;
-        // line from x=-extent to x=extent at z
-        verts.push_back(-extent); verts.push_back(0.0f); verts.push_back(z);
-        verts.push_back(extent); verts.push_back(0.0f); verts.push_back(z);
+        bool isMajor = (i % majorEvery) == 0;
+        if (isMajor) {
+            vertsMajor.push_back(-extent); vertsMajor.push_back(0.0f); vertsMajor.push_back(z);
+            vertsMajor.push_back(extent); vertsMajor.push_back(0.0f); vertsMajor.push_back(z);
+        } else {
+            vertsMinor.push_back(-extent); vertsMinor.push_back(0.0f); vertsMinor.push_back(z);
+            vertsMinor.push_back(extent); vertsMinor.push_back(0.0f); vertsMinor.push_back(z);
+        }
     }
     // lines along Z (varying X)
     for (int i = 0; i < lines; ++i) {
         float x = start + i * spacing;
-        verts.push_back(x); verts.push_back(0.0f); verts.push_back(-extent);
-        verts.push_back(x); verts.push_back(0.0f); verts.push_back(extent);
+        bool isMajor = (i % majorEvery) == 0;
+        if (isMajor) {
+            vertsMajor.push_back(x); vertsMajor.push_back(0.0f); vertsMajor.push_back(-extent);
+            vertsMajor.push_back(x); vertsMajor.push_back(0.0f); vertsMajor.push_back(extent);
+        } else {
+            vertsMinor.push_back(x); vertsMinor.push_back(0.0f); vertsMinor.push_back(-extent);
+            vertsMinor.push_back(x); vertsMinor.push_back(0.0f); vertsMinor.push_back(extent);
+        }
     }
 
-    gridVertexCount_ = verts.size() / 3;
+    gridCountMinor_ = vertsMinor.size() / 3;
+    gridCountMajor_ = vertsMajor.size() / 3;
 
-    glGenVertexArrays(1, &gVAO_);
-    glGenBuffers(1, &gVBO_);
-    glBindVertexArray(gVAO_);
-    glBindBuffer(GL_ARRAY_BUFFER, gVBO_);
-    glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(), GL_STATIC_DRAW);
+    // minor
+    glGenVertexArrays(1, &gVAO_minor_);
+    glGenBuffers(1, &gVBO_minor_);
+    glBindVertexArray(gVAO_minor_);
+    glBindBuffer(GL_ARRAY_BUFFER, gVBO_minor_);
+    glBufferData(GL_ARRAY_BUFFER, vertsMinor.size() * sizeof(float), vertsMinor.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+    // major
+    glGenVertexArrays(1, &gVAO_major_);
+    glGenBuffers(1, &gVBO_major_);
+    glBindVertexArray(gVAO_major_);
+    glBindBuffer(GL_ARRAY_BUFFER, gVBO_major_);
+    glBufferData(GL_ARRAY_BUFFER, vertsMajor.size() * sizeof(float), vertsMajor.data(), GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
 void Renderer::renderGrid(const glm::mat4& mvp, float time) {
-    if (gVAO_ == 0 || gridVertexCount_ == 0) return;
+    if (!gridShader_) return;
     gridShader_->use();
     gridShader_->setMat4("u_MVP", glm::value_ptr(mvp));
     gridShader_->setFloat("u_time", time);
-    glBindVertexArray(gVAO_);
-    glDrawArrays(GL_LINES, 0, (GLsizei)gridVertexCount_);
+
+    // minor lines: thicker
+    if (gVAO_minor_ != 0 && gridCountMinor_ > 0) {
+        glLineWidth(2.0f);
+        gridShader_->setVec3("u_color", 1.0f, 1.0f, 1.0f);
+        glBindVertexArray(gVAO_minor_);
+        glDrawArrays(GL_LINES, 0, (GLsizei)gridCountMinor_);
+    }
+
+    // major lines: much thicker and bright white
+    if (gVAO_major_ != 0 && gridCountMajor_ > 0) {
+        glLineWidth(6.0f);
+        gridShader_->setVec3("u_color", 1.0f, 1.0f, 1.0f);
+        glBindVertexArray(gVAO_major_);
+        glDrawArrays(GL_LINES, 0, (GLsizei)gridCountMajor_);
+    }
+
     glBindVertexArray(0);
+    glLineWidth(1.0f);
 }
 void Renderer::renderParticles(const glm::mat4& mvp, size_t count) {
     if (count == 0 || pVAO_ == 0) return;
