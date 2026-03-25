@@ -8,5 +8,5 @@ uniform mat4 u_MVP;
 void main() {
     vColor = aColor;
     gl_Position = u_MVP * vec4(aPos, 1.0);
-    gl_PointSize = 8.0;
+    gl_PointSize = 3.0;
 }
