@@ -17,7 +17,7 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "3D Particle Renderer", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1600, 900, "3D Particle Renderer", nullptr, nullptr);
     if (!window) {
         std::cerr << "Failed to create GLFW window\n";
         glfwTerminate();

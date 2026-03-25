@@ -43,6 +43,11 @@ void Shader::setMat4(const std::string& name, const float* value) {
     if (loc != -1) glUniformMatrix4fv(loc, 1, GL_FALSE, value);
 }
 
+void Shader::setFloat(const std::string& name, float v) {
+    int loc = glGetUniformLocation(ID_, name.c_str());
+    if (loc != -1) glUniform1f(loc, v);
+}
+
 string Shader::readFile(const string& path) {
     ifstream in(path);
     if (!in) {

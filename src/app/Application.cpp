@@ -96,7 +96,8 @@ void Application::run() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         glm::mat4 mvp = camera_ ? camera_->getViewProjection() : glm::mat4(1.0f);
-        renderer_->render(mvp);
+        // draw grid (space-time visualization)
+        renderer_->renderGrid(mvp, (float)now);
         if (particleSystem_) {
             auto& ps = particleSystem_->particles();
             size_t n = particleSystem_->aliveCount();

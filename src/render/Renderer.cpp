@@ -2,16 +2,21 @@
 #include "render/Shader.h"
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <cmath>
 
 using namespace render;
 
 Renderer::Renderer() {
     // triangle rendering removed; particle buffers are initialized via initParticleBuffers()
+    // initialize a grid visualization
+    initGrid(12.0f, 1.0f);
 }
 
 Renderer::~Renderer() {
     if (pVAO_ != 0) glDeleteVertexArrays(1, &pVAO_);
     if (pVBO_ != 0) glDeleteBuffers(1, &pVBO_);
+    if (gVAO_ != 0) glDeleteVertexArrays(1, &gVAO_);
+    if (gVBO_ != 0) glDeleteBuffers(1, &gVBO_);
 }
 
 void Renderer::render(const glm::mat4& mvp) {
@@ -64,6 +69,48 @@ void Renderer::updateParticleBuffer(const std::vector<Particle>& particles, size
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+void Renderer::initGrid(float extent, float spacing) {
+    gridShader_ = std::make_unique<Shader>("src/render/shaders/grid.vert", "src/render/shaders/grid.frag");
+
+    std::vector<float> verts;
+    int lines = (int)std::floor((extent * 2.0f) / spacing) + 1;
+    float start = -extent;
+    // lines along X (varying Z)
+    for (int i = 0; i < lines; ++i) {
+        float z = start + i * spacing;
+        // line from x=-extent to x=extent at z
+        verts.push_back(-extent); verts.push_back(0.0f); verts.push_back(z);
+        verts.push_back(extent); verts.push_back(0.0f); verts.push_back(z);
+    }
+    // lines along Z (varying X)
+    for (int i = 0; i < lines; ++i) {
+        float x = start + i * spacing;
+        verts.push_back(x); verts.push_back(0.0f); verts.push_back(-extent);
+        verts.push_back(x); verts.push_back(0.0f); verts.push_back(extent);
+    }
+
+    gridVertexCount_ = verts.size() / 3;
+
+    glGenVertexArrays(1, &gVAO_);
+    glGenBuffers(1, &gVBO_);
+    glBindVertexArray(gVAO_);
+    glBindBuffer(GL_ARRAY_BUFFER, gVBO_);
+    glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(), GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void Renderer::renderGrid(const glm::mat4& mvp, float time) {
+    if (gVAO_ == 0 || gridVertexCount_ == 0) return;
+    gridShader_->use();
+    gridShader_->setMat4("u_MVP", glm::value_ptr(mvp));
+    gridShader_->setFloat("u_time", time);
+    glBindVertexArray(gVAO_);
+    glDrawArrays(GL_LINES, 0, (GLsizei)gridVertexCount_);
+    glBindVertexArray(0);
+}
 void Renderer::renderParticles(const glm::mat4& mvp, size_t count) {
     if (count == 0 || pVAO_ == 0) return;
     particleShader_->use();

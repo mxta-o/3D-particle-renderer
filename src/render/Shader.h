@@ -8,6 +8,7 @@ public:
     ~Shader();
     void use();
     void setMat4(const std::string& name, const float* value);
+    void setFloat(const std::string& name, float v);
 private:
     unsigned int ID_ = 0;
     std::string readFile(const std::string& path);
