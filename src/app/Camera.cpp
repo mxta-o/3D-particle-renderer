@@ -54,3 +54,26 @@ glm::mat4 Camera::getViewProjection() const {
     glm::mat4 proj = glm::perspective(fov_, aspect_, 0.1f, 100.0f);
     return proj * view;
 }
+
+glm::vec3 Camera::getPosition() const {
+    float x = distance_ * cosf(pitch_) * sinf(yaw_);
+    float y = distance_ * sinf(pitch_);
+    float z = distance_ * cosf(pitch_) * cosf(yaw_);
+    return target_ + glm::vec3(x, y, z);
+}
+
+void Camera::setPosition(const glm::vec3& pos) {
+    // compute spherical coordinates relative to target_
+    glm::vec3 offset = pos - target_;
+    distance_ = glm::length(offset);
+    if (distance_ < 1e-5f) {
+        distance_ = 0.001f;
+        yaw_ = 0.0f;
+        pitch_ = 0.0f;
+        return;
+    }
+    // pitch = asin(y / r)
+    pitch_ = asinf(glm::clamp(offset.y / distance_, -1.0f, 1.0f));
+    // yaw: atan2(x, z) to match getPosition's use of sin(yaw) for x and cos(yaw) for z
+    yaw_ = atan2f(offset.x, offset.z);
+}

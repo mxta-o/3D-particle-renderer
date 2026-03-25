@@ -53,6 +53,8 @@ Application::Application(GLFWwindow* window)
     particleSystem_->setRestitution(restitutionUI_);
     particleSystem_->setGroundHeight(groundYUI_);
     if (camera_) camera_->setTarget(glm::vec3(0.0f, emitterY_, 0.0f));
+    // position camera to requested world coordinates
+    if (camera_) camera_->setPosition(glm::vec3(10.67f, 6.83f, 18.52f));
     particleSystem_->start();
     glfwSetWindowUserPointer(window_, this);
     glfwSetMouseButtonCallback(window_, glfw_mouse_button_cb);
@@ -97,26 +99,10 @@ void Application::run() {
         if (particleSystem_) {
             ImGui::Text("Particles: %zu", particleSystem_->aliveCount());
         }
-        // Emitter controls
-        if (ImGui::CollapsingHeader("Emitter")) {
-            if (ImGui::SliderFloat("Emitter Y", &emitterY_, 0.0f, 20.0f)) {
-                particleSystem_->setEmitterPos(glm::vec3(0.0f, emitterY_, 0.0f));
-                if (camera_) camera_->setTarget(glm::vec3(0.0f, emitterY_, 0.0f));
-            }
-            if (ImGui::SliderFloat("Emission Rate", &emissionRateUI_, 0.0f, 5000.0f)) {
-                particleSystem_->setEmissionRate(emissionRateUI_);
-            }
-            if (ImGui::SliderFloat("Restitution", &restitutionUI_, 0.0f, 1.0f)) {
-                particleSystem_->setRestitution(restitutionUI_);
-            }
-            if (ImGui::SliderFloat("Ground Y", &groundYUI_, -5.0f, 5.0f)) {
-                particleSystem_->setGroundHeight(groundYUI_);
-            }
-            if (ImGui::Button("Start/Stop")) {
-                static bool running = true;
-                running = !running;
-                if (running) particleSystem_->start(); else particleSystem_->stop();
-            }
+        if (camera_) {
+            glm::vec3 camPos = camera_->getPosition();
+            ImGui::Separator();
+            ImGui::Text("Camera: X: %.2f Y: %.2f Z: %.2f", camPos.x, camPos.y, camPos.z);
         }
         ImGui::End();
 
