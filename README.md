@@ -240,6 +240,8 @@ Work through the phases in order — each one builds on the last and gives you s
 - *3D Math Primer for Graphics and Game Development* (Dunn & Parberry) — very readable linear algebra focused on graphics
 - [GLM documentation](https://glm.g-truc.net/0.9.9/index.html) — mirrors GLSL math in C++
 
+- ps. this is actually heavily vibecoded but i will make a revisit so that i can actually learn cpp and graphics
+
 ### Particle Systems & Graphics Theory
 - Robert Bridson's *Fluid Simulation for Computer Graphics* — for advanced physics
 - [Physically Based Rendering (pbr-book.org)](https://www.pbr-book.org) — deeper rendering theory for later
