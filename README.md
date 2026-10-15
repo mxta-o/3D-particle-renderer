@@ -244,3 +244,5 @@ Work through the phases in order — each one builds on the last and gives you s
 - Robert Bridson's *Fluid Simulation for Computer Graphics* — for advanced physics
 - [Physically Based Rendering (pbr-book.org)](https://www.pbr-book.org) — deeper rendering theory for later
 - GPU Gems (free online via NVIDIA): chapters on particle systems and GPU physics
+
+- Real-Time Rendering (realtimerendering.com) — general reference
